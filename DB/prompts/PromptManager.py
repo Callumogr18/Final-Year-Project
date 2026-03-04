@@ -56,7 +56,9 @@ class PromptManager:
         logger.info(f"Fetching prompt {id} from DB...")
 
         self.cursor.execute(
-            'SELECT "id", "task_type", "question", "ground_truths", "answer", "contexts" FROM public.prompts WHERE "id" = %s',
+            '''SELECT "id", "task_type", "question", "ground_truths",
+            "answer", "contexts", "article", "highlights"
+            FROM public.prompts WHERE "id" = %s''',
             (id,)
         )
 
@@ -65,16 +67,43 @@ class PromptManager:
             logger.error(f"No Prompt {id} in DB")
             return None
 
-        prompt = Prompt(
+        return Prompt(
+            id=row[0],
+            task_type=row[1],
+            input_text=row[2],
+            reference_output=row[3],
+            answer=row[4],
+            contexts=row[5],
+            article=row[6],
+            highlights=row[7]
+        )
+
+    def load_prompts_by_ids(self, ids: List[int]) -> List[Prompt]:
+        logger.info(f"Fetching {len(ids)} prompts from DB...")
+
+        self.cursor.execute(
+            '''SELECT "id", "task_type", "question", "ground_truths",
+            "answer", "contexts", "article", "highlights"
+            FROM public.prompts WHERE "id" = ANY(%s)''',
+            (ids,)
+        )
+
+        rows = self.cursor.fetchall()
+        logger.info(f"Gathered {len(rows)} prompts from DB")
+
+        return [
+            Prompt(
                 id=row[0],
                 task_type=row[1],
                 input_text=row[2],
                 reference_output=row[3],
                 answer=row[4],
-                contexts=row[5]
+                contexts=row[5],
+                article=row[6],
+                highlights=row[7]
             )
-        
-        return prompt
+            for row in rows
+        ]
     
 
     def batch_prompts(self, prompts: List[Prompt], batch_size: int = 10) -> List[PromptBatch]:

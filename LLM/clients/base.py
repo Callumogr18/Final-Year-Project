@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
 
 SYSTEM_PROMPTS = {
-    'QA': 'You are a question answering assistant. Answer the question directly and concisely using only the information provided. Do not add unnecessary detail.',
-    'Reasoning': 'You are a logical reasoning assistant. Think through the problem step by step and provide a clear, structured answer.',
-    'Summarisation': 'You are a summarisation assistant. Provide a concise summary that captures the key points. Do not add information beyond what is provided.',
+    'QA': 'You are a question answering assistant. Answer using only the shortest possible phrase or span from the provided context. Do not write full sentences or add any explanation.',
+    'SUMMARISATION': 'You are a news summarisation assistant. Write a piece summarising the article, ensure that length is appropriate for a summary. Each sentence must use the specific names, places, and facts from the article directly. Do not paraphrase or generalise. Do not add information beyond what is provided.'
 }
 
 class BaseLLMClient(ABC):

@@ -4,3 +4,4 @@ __pycache__/
 *test.py
 *.sh
 *.log
+*seed_data.py
