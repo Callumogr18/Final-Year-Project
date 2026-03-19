@@ -1,7 +1,7 @@
+import argparse
 import logging
 from dotenv import load_dotenv
 import subprocess, sys
-from random import randint
 
 from DB.prompts.PromptManager import PromptManager
 from DB.LLM_storage.ResponseManager import ResponseManager
@@ -9,6 +9,8 @@ from DB import db_conn
 from LLM.ResponseGenerator import ResponseGenerator
 from metrics.traditional.scorer import metric_scorer
 from LLM.clients import azure_client
+from LLM.judge.judge import LLMAsJudge
+from LLM.judge.helper import save_judge_scores
 
 load_dotenv()
 
@@ -41,6 +43,8 @@ if __name__ == '__main__':
                             "2 - Task Type\n"
                             "3 - Multiple IDs\n"
                             ">>> "))
+
+        prompts = []
         try:
             if run_type == 1:
                 id = input("Enter Prompt ID >>> ")
@@ -64,6 +68,7 @@ if __name__ == '__main__':
             logger.error(f"Integer value of 1-3 expected got {run_type} - {e}")
             exit(1)
 
+
         if not prompts:
             if run_type == 1:
                 logger.error(f"No prompts found for Prompt {id}")
@@ -80,6 +85,7 @@ if __name__ == '__main__':
             logger.info(f"Using prompt {few_shot_example.id} as few-shot example for summarisation")
 
         clients = [azure_client.AzureClient()]
+        judge = LLMAsJudge()
 
         logger.info("Checking if batch possible...")
 
@@ -101,6 +107,8 @@ if __name__ == '__main__':
                                 gen_data['response_id'],
                                 prompt.task_type,
                                 batch_id=None)
+                    judge_result = judge.evaluate(prompt, gen_data['llm_response'])
+                    save_judge_scores(judge_result, gen_data['response_id'], prompt.id, conn, prompt.task_type)
 
             conn.close()
 
@@ -125,6 +133,8 @@ if __name__ == '__main__':
                                     gen_data['response_id'],
                                     prompt.task_type,
                                     batch_id=batch.batch_id)
+                        judge_result = judge.evaluate(prompt, gen_data['llm_response'])
+                        save_judge_scores(judge_result, gen_data['response_id'], prompt.id, conn, prompt.task_type, batch_id=batch.batch_id)
             conn.close()
 
     

@@ -1,0 +1,14 @@
+psycopg2-binary
+pandas
+requests
+openai
+python-dotenv
+pyarrow
+datasets
+sacrebleu
+rouge
+streamlit
+matplotlib
+langchain-openai
+deepeval
+argparse
