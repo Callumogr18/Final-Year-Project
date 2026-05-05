@@ -1,7 +1,10 @@
 *.env
 .venv/
 __pycache__/
+__.pytest_cache/
 *test.py
 *.sh
 *.log
 *seed_data.py
+.deepeval/
+output/
